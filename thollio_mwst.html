@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>thollio_mwst - Mehrwertsteuer-Rechner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-800 via-gray-900 to-black flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <div class="bg-gray-800 rounded-2xl shadow-2xl p-8 border border-gray-700">
+            <!-- Header -->
+            <div class="flex items-center justify-center mb-8">
+                <svg class="w-8 h-8 text-blue-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                </svg>
+                <h1 class="text-3xl font-bold text-white">thollio_mwst</h1>
+            </div>
+
+            <!-- Subtitle -->
+            <p class="text-gray-400 text-center mb-8">Mehrwertsteuer-Rechner</p>
+
+            <!-- Input Fields -->
+            <div class="space-y-6">
+                <!-- Netto -->
+                <div>
+                    <label class="block text-gray-300 text-sm font-semibold mb-2">Netto</label>
+                    <div class="relative">
+                        <input
+                            type="number"
+                            step="0.01"
+                            id="netto"
+                            placeholder="0.00"
+                            class="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                        />
+                        <span class="absolute right-4 top-3 text-gray-400">€</span>
+                    </div>
+                </div>
+
+                <!-- Mehrwertsteuer -->
+                <div>
+                    <label class="block text-gray-300 text-sm font-semibold mb-2">Mehrwertsteuer</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button
+                            id="btn7"
+                            onclick="setMwst('7')"
+                            class="py-3 rounded-lg font-semibold transition-all bg-gray-700 text-gray-300 hover:bg-gray-600"
+                        >
+                            7%
+                        </button>
+                        <button
+                            id="btn19"
+                            onclick="setMwst('19')"
+                            class="py-3 rounded-lg font-semibold transition-all bg-blue-600 text-white shadow-lg shadow-blue-500/50"
+                        >
+                            19%
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Brutto -->
+                <div>
+                    <label class="block text-gray-300 text-sm font-semibold mb-2">Brutto</label>
+                    <div class="relative">
+                        <input
+                            type="number"
+                            step="0.01"
+                            id="brutto"
+                            placeholder="0.00"
+                            class="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                        />
+                        <span class="absolute right-4 top-3 text-gray-400">€</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Berechnung Anzeige -->
+            <div id="calculation" class="mt-6 bg-gray-700/50 rounded-lg p-4 border border-gray-600 hidden">
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-gray-300">MwSt-Betrag:</span>
+                    <span id="mwstBetrag" class="text-blue-400 font-bold text-lg">0.00 €</span>
+                </div>
+            </div>
+
+            <!-- Reset Button -->
+            <button
+                onclick="resetAll()"
+                class="w-full mt-6 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-lg transition-all"
+            >
+                Zurücksetzen
+            </button>
+
+            <!-- Footer -->
+            <div class="mt-6 text-center text-gray-500 text-xs">
+                Geben Sie zwei Werte ein, der dritte wird automatisch berechnet
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMwst = 19;
+        let lastChanged = null;
+
+        const nettoInput = document.getElementById('netto');
+        const bruttoInput = document.getElementById('brutto');
+        const calculationDiv = document.getElementById('calculation');
+        const mwstBetragSpan = document.getElementById('mwstBetrag');
+
+        nettoInput.addEventListener('input', function() {
+            lastChanged = 'netto';
+            calculate();
+        });
+
+        bruttoInput.addEventListener('input', function() {
+            lastChanged = 'brutto';
+            calculate();
+        });
+
+        function setMwst(rate) {
+            currentMwst = parseFloat(rate);
+            lastChanged = 'mwst';
+            
+            // Update button styles
+            const btn7 = document.getElementById('btn7');
+            const btn19 = document.getElementById('btn19');
+            
+            if (rate === '7') {
+                btn7.className = 'py-3 rounded-lg font-semibold transition-all bg-blue-600 text-white shadow-lg shadow-blue-500/50';
+                btn19.className = 'py-3 rounded-lg font-semibold transition-all bg-gray-700 text-gray-300 hover:bg-gray-600';
+            } else {
+                btn19.className = 'py-3 rounded-lg font-semibold transition-all bg-blue-600 text-white shadow-lg shadow-blue-500/50';
+                btn7.className = 'py-3 rounded-lg font-semibold transition-all bg-gray-700 text-gray-300 hover:bg-gray-600';
+            }
+            
+            calculate();
+        }
+
+        function calculate() {
+            const netto = parseFloat(nettoInput.value);
+            const brutto = parseFloat(bruttoInput.value);
+
+            if (lastChanged === 'netto' && !isNaN(netto)) {
+                // Berechne Brutto aus Netto
+                const calculatedBrutto = netto * (1 + currentMwst / 100);
+                bruttoInput.value = calculatedBrutto.toFixed(2);
+                showCalculation(netto, calculatedBrutto);
+            } else if (lastChanged === 'brutto' && !isNaN(brutto)) {
+                // Berechne Netto aus Brutto
+                const calculatedNetto = brutto / (1 + currentMwst / 100);
+                nettoInput.value = calculatedNetto.toFixed(2);
+                showCalculation(calculatedNetto, brutto);
+            } else if (lastChanged === 'mwst') {
+                // Wenn MwSt geändert wird
+                if (nettoInput.value && !isNaN(netto)) {
+                    const calculatedBrutto = netto * (1 + currentMwst / 100);
+                    bruttoInput.value = calculatedBrutto.toFixed(2);
+                    showCalculation(netto, calculatedBrutto);
+                } else if (bruttoInput.value && !isNaN(brutto)) {
+                    const calculatedNetto = brutto / (1 + currentMwst / 100);
+                    nettoInput.value = calculatedNetto.toFixed(2);
+                    showCalculation(calculatedNetto, brutto);
+                }
+            }
+        }
+
+        function showCalculation(netto, brutto) {
+            if (!isNaN(netto) && !isNaN(brutto)) {
+                const mwstBetrag = brutto - netto;
+                mwstBetragSpan.textContent = mwstBetrag.toFixed(2) + ' €';
+                calculationDiv.classList.remove('hidden');
+            } else {
+                calculationDiv.classList.add('hidden');
+            }
+        }
+
+        function resetAll() {
+            nettoInput.value = '';
+            bruttoInput.value = '';
+            currentMwst = 19;
+            lastChanged = null;
+            calculationDiv.classList.add('hidden');
+            
+            // Reset buttons
+            document.getElementById('btn19').className = 'py-3 rounded-lg font-semibold transition-all bg-blue-600 text-white shadow-lg shadow-blue-500/50';
+            document.getElementById('btn7').className = 'py-3 rounded-lg font-semibold transition-all bg-gray-700 text-gray-300 hover:bg-gray-600';
+        }
+    </script>
+</body>
+</html>
