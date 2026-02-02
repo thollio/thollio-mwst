@@ -30,15 +30,30 @@
                 <!-- Netto -->
                 <div>
                     <label class="block text-gray-300 text-sm font-semibold mb-2">Netto</label>
-                    <div class="relative">
-                        <input
-                            type="number"
-                            step="0.01"
-                            id="netto"
-                            placeholder="0.00"
-                            class="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-                        />
-                        <span class="absolute right-4 top-3 text-gray-400">€</span>
+                    <div class="flex gap-2">
+                        <div class="relative flex-1">
+                            <input
+                                type="number"
+                                step="0.01"
+                                id="netto"
+                                placeholder="0.00"
+                                class="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                            />
+                            <span class="absolute right-4 top-3 text-gray-400">€</span>
+                        </div>
+                        <button
+                            id="copyNettoBtn"
+                            onclick="copyNetto()"
+                            class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-3 rounded-lg transition-all flex items-center justify-center"
+                            title="Netto-Betrag kopieren"
+                        >
+                            <svg id="copyIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                            </svg>
+                            <svg id="checkIcon" class="w-5 h-5 hidden text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </button>
                     </div>
                 </div>
 
@@ -188,6 +203,39 @@
             // Reset buttons
             document.getElementById('btn19').className = 'py-3 rounded-lg font-semibold transition-all bg-blue-600 text-white shadow-lg shadow-blue-500/50';
             document.getElementById('btn7').className = 'py-3 rounded-lg font-semibold transition-all bg-gray-700 text-gray-300 hover:bg-gray-600';
+        }
+
+        function copyNetto() {
+            const netto = nettoInput.value;
+            
+            if (!netto || netto === '') {
+                // Zeige kurz eine Warnung wenn kein Wert vorhanden ist
+                const btn = document.getElementById('copyNettoBtn');
+                btn.classList.add('bg-red-600');
+                setTimeout(() => {
+                    btn.classList.remove('bg-red-600');
+                }, 300);
+                return;
+            }
+            
+            // Kopiere den Wert in die Zwischenablage
+            navigator.clipboard.writeText(netto).then(() => {
+                // Zeige visuelles Feedback
+                const copyIcon = document.getElementById('copyIcon');
+                const checkIcon = document.getElementById('checkIcon');
+                
+                copyIcon.classList.add('hidden');
+                checkIcon.classList.remove('hidden');
+                
+                // Zurück zum Kopier-Icon nach 2 Sekunden
+                setTimeout(() => {
+                    copyIcon.classList.remove('hidden');
+                    checkIcon.classList.add('hidden');
+                }, 2000);
+            }).catch(err => {
+                console.error('Fehler beim Kopieren:', err);
+                alert('Kopieren fehlgeschlagen. Bitte manuell kopieren.');
+            });
         }
     </script>
 </body>
